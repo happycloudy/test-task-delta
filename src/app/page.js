@@ -1,95 +1,44 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
 
-export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+import Main from '@/app/shared/Main';
+import Search from '@/app/components/Filter';
+import Grid from '@/app/components/Grid';
+import {useCallback, useState} from 'react';
+import Header from '@/app/components/Header';
+import {useDebounce} from '@/app/hooks/useDebounce';
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+export default function Page() {
+	const [search, setSearch] = useState('')
+	const [orderBy, setOrderBy] = useState({})
+	const [platforms, setPlatforms] = useState([])
+	const debouncedSearch = useDebounce(search, 500)
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+	const handleOrderBy = useCallback((sortBy) => setOrderBy(sortBy.value.length ? sortBy : {}), [])
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+	const handlePlatform = useCallback((platform) => {
+		if (!platform.value) {
+			setPlatforms([])
+			return
+		}
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
+		const existPlatform = platforms.find(item => item.value === platform.value)
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+		if (existPlatform) setPlatforms(prev => prev.filter(item => item.value !== platform.value))
+		else setPlatforms(prev => [...prev, platform])
+	}, [platforms])
+
+	const handleSearch = useCallback((e) => setSearch(e.target.value), [])
+
+	return (
+		<>
+			<Header search={search} handleSearch={handleSearch}/>
+			<Main>
+				<Search orderBy={orderBy}
+								platform={platforms}
+								handleOrderBy={handleOrderBy}
+								handlePlatform={handlePlatform}/>
+				<Grid ordering={orderBy.value} platforms={platforms} search={debouncedSearch}/>
+			</Main>
+		</>
+	)
 }
