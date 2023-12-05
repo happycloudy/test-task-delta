@@ -25,9 +25,13 @@ const GameSectionInfo = ({
 		<GameSectionInfoWrap>
 			<GameSectionInfoTitle>
 				{title}
-				<a href={website} target={'_blank'}>
-					<Image src={'/images/link.svg'} width={24} height={24} alt={'Link image'}/>
-				</a>
+				{
+					website ?
+						<a href={website} target={'_blank'}>
+							<Image src={'/images/link.svg'} width={24} height={24} alt={'Link image'}/>
+						</a> :
+						undefined
+				}
 			</GameSectionInfoTitle>
 			<GameSectionInfoAdditional>
 				<GameSectionInfoAdditionalItem>
